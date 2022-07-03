@@ -4,7 +4,6 @@ import sqlite3
 class DatabaseError(Exception):
     pass
 
-
 def add_headers_sqlite(d, cursor):
     headers = [description[0] for description in cursor.description]
     _data = {headers[index]: value for index, value in enumerate(d)}
@@ -38,3 +37,22 @@ def get_document_by_id(id):
             document.append(add_headers_sqlite(d, cursor))
 
     return document
+
+
+def get_tags_from_document(id):
+    tags = []
+    with sqlite3.connect("document.db") as conn:
+        try:
+            cursor = conn.execute('''SELECT t.name
+                                     FROM document_tag as dt, tag as t
+                                     WHERE dt.document_id = {}
+                                     AND dt.tag_id = t.id
+                                     '''.format(id))
+            data = cursor.fetchall()
+        except sqlite3.Error as err:
+            raise DatabaseError(err.args[0])
+
+        for d in data:
+            tags.append(add_headers_sqlite(d, cursor))
+
+    return tags
