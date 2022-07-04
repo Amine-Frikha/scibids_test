@@ -5,12 +5,17 @@ function App() {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [documents, setDocuments] = useState([]);
+
+  // we fetch our data from the api here in the useEffect hook
+  // so that it is executed only on the first render of the page
   useEffect(() => {
     fetch("/fulldocs")
       .then((res) => res.json())
       .then(
         (result) => {
           setIsLoaded(true);
+          // here we are saving our data in Documents after
+          // changing is_serious from numbers to Yes/No
           setDocuments(
             result.data
               .filter((document) => document.name === "Scibids")
@@ -21,7 +26,7 @@ function App() {
               )
           );
         },
-        // Note: it's important to handle errors here
+        // it's important to handle errors here
         // instead of a catch() block so that we don't swallow
         // exceptions from actual bugs in components.
         (error) => {
@@ -30,10 +35,12 @@ function App() {
         }
       );
   }, []);
-  const oldVer = documents.filter((document) => document.version === 1)[0];
 
+  const oldVer = documents.filter((document) => document.version === 1)[0];
   const newVer = documents.filter((document) => document.version === 2)[0];
 
+  // Before rendering content we check for errors and or Loading phase
+  // if everything is ok, we proceed.
   if (error) {
     return <div>Error: {error.message}</div>;
   } else if (!isLoaded) {
